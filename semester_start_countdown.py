@@ -8,7 +8,7 @@
 # * **Spring 2021** - 19 January 2021
 # 
 # ## Last Update
-# Tuesday, 13 October 2020
+# Wednesday, 14 October 2020
 # 
 # ## Data Sources
 # * California Department of Public Health
@@ -112,6 +112,7 @@ fig, ax = plt.subplots(figsize=(10, 4), dpi=300)
 ax.set_title("Los Angeles County COVID-19 Transmission before The Claremont Colleges' Semester")
 sns.lineplot(DAYS_UNTIL_SEMESTER, NEW_CASES_AVG, SEMESTER, data=df_la, ax=ax)
 ax.set_xlim(120, 0)
+fig.savefig('docs/semester-start-v-new-cases.png')
 fig.show()
 
 
@@ -128,11 +129,18 @@ ax.plot(DAYS_UNTIL_SEMESTER, HOSPITALIZED_ALL_AVG, '--', color=sns.color_palette
 ax.plot(DAYS_UNTIL_SEMESTER, HOSPITALIZED_CONFIRMED_AVG, color=sns.color_palette()[1], label='Spring 2021, Confirmed',
         data=df_la[df_la[SEMESTER] == SPRING_2021])
 
-ax.legend(title='Semester, Patient COVID-19 Status')
-ax.set_xlabel('Days Until Semester Start')
+ax.legend(title='Semester, Patient COVID-19 Diagnosis')
+ax.set_xlabel(DAYS_UNTIL_SEMESTER)
 ax.set_ylabel('Hospitalized, 3 day avgerage')
 ax.set_title("Los Angeles County COVID-19 Hospital Patients before The Claremont Colleges' Semester")
 ax.set_xlim(120, 0)
 ax.set_ylim(0)
+fig.savefig('docs/semester-start-v-hospitalized.png')
 fig.show()
+
+
+# In[ ]:
+
+
+
 
