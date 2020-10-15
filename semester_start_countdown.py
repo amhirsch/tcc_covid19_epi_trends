@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # The Claremont Colleges' Campus Reopening vs COVID-19 Trends
+# # The Claremont Colleges' Semester Start Timeline vs Los Angeles County COVID-19 Trends
 # 
 # ## Semester Start Dates
 # * **Fall 2020** - 24 August 2020
 # * **Spring 2021** - 19 January 2021
 # 
 # ## Last Update
-# Wednesday, 14 October 2020
+# Thursday, 15 October 2020
 # 
 # ## Data Sources
 # * California Department of Public Health
@@ -77,14 +77,20 @@ fetch_ca_dataset(CA_HOSPITALIZED_URL, CA_HOSPITALIZED_CSV)
 
 df_cases = pd.read_csv(CA_CASES_CSV)
 df_hospitalized = pd.read_csv(CA_HOSPITALIZED_CSV)
-
 la_cases = df_cases[df_cases[COUNTY] == LOS_ANGELES]
 la_hospitalized = df_hospitalized[df_hospitalized[COUNTY] == LOS_ANGELES]
 
 df_la = pd.merge(la_cases, la_hospitalized, left_on=DATE, right_on='todays_date')
 df_la.reset_index(drop=True, inplace=True)
 df_la = df_la.loc[:, (DATE, NEW_CASES, HOSPITALIZED_CONFIRMED, HOSPITALIZED_ALL)]
-df_la.loc[187, NEW_CASES] = 578  # Awaiting correction from CDPH dataset
+
+# Approximate the new cases for October 2, 2020 as
+# the mean of new cases three days before and after
+bad_data_id = 187
+padding = 3
+df_la.loc[bad_data_id, NEW_CASES] = round(
+    df_la.loc[bad_data_id-padding:bad_data_id-1, NEW_CASES].append(
+    df_la.loc[bad_data_id+1:bad_data_id+padding, NEW_CASES]).mean())
 
 df_la.loc[:, (DATE,)] = pd.to_datetime(df_la[DATE])
 df_la.loc[:, (HOSPITALIZED_CONFIRMED,)] = df_la[HOSPITALIZED_CONFIRMED].astype('int')
@@ -97,22 +103,18 @@ daily_average = (
 for col_day, col_avg, window in daily_average:
     df_la[col_avg] = df_la[col_day].rolling(window).mean().round(1)
 
-
-# In[4]:
-
-
 df_la[SEMESTER] = df_la[DATE].apply(lambda x: FALL_2020 if x <= FALL_2020_START else SPRING_2021)
 df_la[DAYS_UNTIL_SEMESTER] = df_la.apply(days_until_start, 'columns')
 
 
-# In[5]:
+# In[4]:
 
 
 fig, ax = plt.subplots(figsize=(10, 4), dpi=300)
-ax.set_title("Los Angeles County COVID-19 Transmission before The Claremont Colleges' Semester")
+ax.set_title("Los Angeles County COVID-19 Transmission before TCC Semester")
 sns.lineplot(DAYS_UNTIL_SEMESTER, NEW_CASES_AVG, SEMESTER, data=df_la, ax=ax)
 ax.set_xlim(120, 0)
-fig.savefig('docs/semester-start-v-new-cases.png')
+# fig.savefig('docs/semester-start-v-new-cases.png')
 fig.show()
 
 
@@ -132,10 +134,10 @@ ax.plot(DAYS_UNTIL_SEMESTER, HOSPITALIZED_CONFIRMED_AVG, color=sns.color_palette
 ax.legend(title='Semester, Patient COVID-19 Diagnosis')
 ax.set_xlabel(DAYS_UNTIL_SEMESTER)
 ax.set_ylabel('Hospitalized, 3 day avgerage')
-ax.set_title("Los Angeles County COVID-19 Hospital Patients before The Claremont Colleges' Semester")
+ax.set_title("Los Angeles County COVID-19 Hospital Patients before TCC Semester")
 ax.set_xlim(120, 0)
 ax.set_ylim(0)
-fig.savefig('docs/semester-start-v-hospitalized.png')
+# fig.savefig('docs/semester-start-v-hospitalized.png')
 fig.show()
 
 
