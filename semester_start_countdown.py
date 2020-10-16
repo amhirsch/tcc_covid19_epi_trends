@@ -8,7 +8,7 @@
 # * **Spring 2021** - 19 January 2021
 # 
 # ## Last Update
-# Thursday, 15 October 2020
+# Friday, 16 October 2020
 # 
 # ## Data Sources
 # * California Department of Public Health
@@ -114,11 +114,12 @@ fig, ax = plt.subplots(figsize=(10, 4), dpi=300)
 ax.set_title("Los Angeles County COVID-19 Transmission before TCC Semester")
 sns.lineplot(DAYS_UNTIL_SEMESTER, NEW_CASES_AVG, SEMESTER, data=df_la, ax=ax)
 ax.set_xlim(120, 0)
+ax.set_ylim(500)
 # fig.savefig('docs/semester-start-v-new-cases.png')
 fig.show()
 
 
-# In[6]:
+# In[5]:
 
 
 fig, ax = plt.subplots(figsize=(10, 4), dpi=300)
