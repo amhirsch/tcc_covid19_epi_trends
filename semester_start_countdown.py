@@ -8,7 +8,7 @@
 # * **Spring 2021** - 19 January 2021
 # 
 # ## Last Update
-# Sunday, 18 October 2020
+# Monday, 19 October 2020
 # 
 # ## Data Sources
 # * California Department of Public Health
