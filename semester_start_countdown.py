@@ -5,7 +5,7 @@
 # 
 # ## Semester Start Dates
 # * **Fall 2020** - 24 August 2020
-# * **Spring 2021** - 19 January 2021
+# * **Spring 2021** - 25 January 2021
 # 
 # ## Last Update
 # Tuesday, 20 October 2020
@@ -50,7 +50,7 @@ DAYS_UNTIL_SEMESTER = 'Days Until Semester Start'
 FALL_2020 = 'Fall 2020'
 FALL_2020_START = pd.Timestamp('2020-08-24')
 SPRING_2021 = 'Spring 2021'
-SPRING_2021_START = pd.Timestamp('2021-01-19')
+SPRING_2021_START = pd.Timestamp('2021-01-25')
 
 def fetch_ca_dataset(url, output_csv):
     r = requests.get(url)
@@ -72,7 +72,7 @@ fetch_ca_dataset(CA_CASES_URL, CA_CASES_CSV)
 fetch_ca_dataset(CA_HOSPITALIZED_URL, CA_HOSPITALIZED_CSV)
 
 
-# In[3]:
+# In[2]:
 
 
 df_cases = pd.read_csv(CA_CASES_CSV)
@@ -107,7 +107,7 @@ df_la[SEMESTER] = df_la[DATE].apply(lambda x: FALL_2020 if x <= FALL_2020_START 
 df_la[DAYS_UNTIL_SEMESTER] = df_la.apply(days_until_start, 'columns')
 
 
-# In[6]:
+# In[3]:
 
 
 fig, ax = plt.subplots(figsize=(10, 5), dpi=300)
@@ -133,7 +133,7 @@ ax.set_ylim(400, 3350)
 fig.show()
 
 
-# In[5]:
+# In[4]:
 
 
 fig, ax = plt.subplots(figsize=(10, 4), dpi=300)
