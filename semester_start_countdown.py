@@ -8,7 +8,7 @@
 # * **Spring 2021** - 19 January 2021
 # 
 # ## Last Update
-# Monday, 19 October 2020
+# Tuesday, 20 October 2020
 # 
 # ## Data Sources
 # * California Department of Public Health
@@ -107,14 +107,28 @@ df_la[SEMESTER] = df_la[DATE].apply(lambda x: FALL_2020 if x <= FALL_2020_START 
 df_la[DAYS_UNTIL_SEMESTER] = df_la.apply(days_until_start, 'columns')
 
 
-# In[4]:
+# In[6]:
 
 
-fig, ax = plt.subplots(figsize=(10, 4), dpi=300)
-ax.set_title("Los Angeles County COVID-19 Transmission before TCC Semester")
+fig, ax = plt.subplots(figsize=(10, 5), dpi=300)
+
+substantial_rate = 952.3
+substantial_color = '#c43d53'
+moderate_rate = 544.2
+moderate_color = '#d97641'
+bottom_margin = 50
+message = 'Lecture capactiy restricted to {}%'
+alpha = 0.75
+ax.axhline(substantial_rate, color=substantial_color, linestyle='dashed', alpha=alpha)
+ax.text(45, substantial_rate+bottom_margin, message.format(25), color=substantial_color, alpha=alpha)
+ax.axhline(moderate_rate, color=moderate_color, linestyle='dashed', alpha=alpha)
+ax.text(45, moderate_rate+bottom_margin, message.format(50), color=moderate_color, alpha=alpha)
+
+ax.set_title('Los Angeles County COVID-19 Transmission before TCC Semester')
 sns.lineplot(DAYS_UNTIL_SEMESTER, NEW_CASES_AVG, SEMESTER, data=df_la, ax=ax)
 ax.set_xlim(120, 0)
-ax.set_ylim(500)
+ax.set_ylim(400, 3350)
+
 # fig.savefig('docs/semester-start-v-new-cases.png')
 fig.show()
 
@@ -135,7 +149,7 @@ ax.plot(DAYS_UNTIL_SEMESTER, HOSPITALIZED_CONFIRMED_AVG, color=sns.color_palette
 ax.legend(title='Semester, Patient COVID-19 Diagnosis')
 ax.set_xlabel(DAYS_UNTIL_SEMESTER)
 ax.set_ylabel('Hospitalized, 3 day avgerage')
-ax.set_title("Los Angeles County COVID-19 Hospital Patients before TCC Semester")
+ax.set_title('Los Angeles County COVID-19 Hospital Patients before TCC Semester')
 ax.set_xlim(120, 0)
 ax.set_ylim(0)
 # fig.savefig('docs/semester-start-v-hospitalized.png')
