@@ -8,7 +8,7 @@
 # * **Spring 2021** - 25 January 2021
 # 
 # ## Last Update
-# Tuesday, 20 October 2020
+# Thursday, 22 October 2020
 # 
 # ## Data Sources
 # * California Department of Public Health
@@ -72,7 +72,7 @@ fetch_ca_dataset(CA_CASES_URL, CA_CASES_CSV)
 fetch_ca_dataset(CA_HOSPITALIZED_URL, CA_HOSPITALIZED_CSV)
 
 
-# In[2]:
+# In[3]:
 
 
 df_cases = pd.read_csv(CA_CASES_CSV)
@@ -107,14 +107,15 @@ df_la[SEMESTER] = df_la[DATE].apply(lambda x: FALL_2020 if x <= FALL_2020_START 
 df_la[DAYS_UNTIL_SEMESTER] = df_la.apply(days_until_start, 'columns')
 
 
-# In[3]:
+# In[4]:
 
 
 fig, ax = plt.subplots(figsize=(10, 5), dpi=300)
 
-substantial_rate = 952.3
+rate_multiplier = (10_257_557 / 1e5) * (0.754 ** -1)
+substantial_rate = 7 * rate_multiplier
 substantial_color = '#c43d53'
-moderate_rate = 544.2
+moderate_rate = 4 * rate_multiplier
 moderate_color = '#d97641'
 bottom_margin = 50
 message = 'Lecture capactiy restricted to {}%'
@@ -133,7 +134,7 @@ ax.set_ylim(400, 3350)
 fig.show()
 
 
-# In[4]:
+# In[5]:
 
 
 fig, ax = plt.subplots(figsize=(10, 4), dpi=300)
