@@ -8,7 +8,7 @@
 # * **Spring 2021** - 25 January 2021
 # 
 # ## Last Update
-# Sunday, 25 October 2020
+# Tuesday, 27 October 2020
 # 
 # ## Data Sources
 # * California Department of Public Health
@@ -112,7 +112,7 @@ df_la[DAYS_UNTIL_SEMESTER] = df_la.apply(days_until_start, 'columns')
 
 fig, ax = plt.subplots(figsize=(10, 5), dpi=300)
 
-rate_multiplier = (10_257_557 / 1e5) / 0.754
+rate_multiplier = (10_257_557 / 1e5) / 0.722
 substantial_rate = 7 * rate_multiplier
 substantial_color = '#c43d53'
 moderate_rate = 4 * rate_multiplier
