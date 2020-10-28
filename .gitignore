@@ -1,4 +1,5 @@
 .ipynb_checkpoints/
 *.ipynb
 
+LA_County_Covid19_cases_deaths_date_table.csv
 ca_*.csv
