@@ -69,12 +69,13 @@ def days_until_start(row: pd.Series) -> int:
 fetch_ca_dataset(CA_HOSPITALIZED_URL, CA_HOSPITALIZED_CSV)
 
 
-# In[4]:
+# In[2]:
 
 
 la_cases = pd.read_csv(LA_CASES_CSV)
 la_cases.rename(columns={'date_use': DATE, 'avg_cases': NEW_CASES_AVG}, inplace=True)
 la_cases[DATE] = pd.to_datetime(la_cases[DATE])
+reporting_lag_window = la_cases[DATE].max() - pd.Timedelta(7, 'days')
 
 df_hospitalized = pd.read_csv(CA_HOSPITALIZED_CSV)
 df_hospitalized.rename(columns={'todays_date': DATE}, inplace=True)
@@ -96,7 +97,7 @@ df_la[SEMESTER] = df_la[DATE].apply(lambda x: FALL_2020 if x <= FALL_2020_START 
 df_la[DAYS_UNTIL_SEMESTER] = df_la.apply(days_until_start, 'columns')
 
 
-# In[5]:
+# In[3]:
 
 
 fig, ax = plt.subplots(figsize=(10, 5), dpi=300)
@@ -114,7 +115,6 @@ ax.text(45, substantial_rate+bottom_margin, message.format(25), color=substantia
 ax.axhline(moderate_rate, color=moderate_color, linestyle='dashed', alpha=alpha)
 ax.text(45, moderate_rate+bottom_margin, message.format(50), color=moderate_color, alpha=alpha)
 
-reporting_lag_window = df_la[DATE].max() - pd.Timedelta(7, 'days')
 ax.set_title('Los Angeles County COVID-19 Transmission before TCC Semester')
 ax.plot(DAYS_UNTIL_SEMESTER, NEW_CASES_AVG, color=FALL_2020_COLOR, label='Fall 2020',
         data=df_la[df_la[SEMESTER]==FALL_2020])
@@ -133,7 +133,7 @@ ax.set_ylim(400, 3350)
 fig.show()
 
 
-# In[6]:
+# In[4]:
 
 
 fig, ax = plt.subplots(figsize=(10, 4), dpi=300)
