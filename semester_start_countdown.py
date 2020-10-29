@@ -69,7 +69,7 @@ def days_until_start(row: pd.Series) -> int:
 fetch_ca_dataset(CA_HOSPITALIZED_URL, CA_HOSPITALIZED_CSV)
 
 
-# In[2]:
+# In[3]:
 
 
 la_cases = pd.read_csv(LA_CASES_CSV)
@@ -97,7 +97,7 @@ df_la[SEMESTER] = df_la[DATE].apply(lambda x: FALL_2020 if x <= FALL_2020_START 
 df_la[DAYS_UNTIL_SEMESTER] = df_la.apply(days_until_start, 'columns')
 
 
-# In[3]:
+# In[4]:
 
 
 fig, ax = plt.subplots(figsize=(10, 5), dpi=300)
@@ -127,13 +127,13 @@ ax.legend(title='Semester')
 ax.set_xlabel(DAYS_UNTIL_SEMESTER)
 ax.set_ylabel(NEW_CASES_AVG)
 ax.set_xlim(120, 0)
-ax.set_ylim(400, 3350)
+ax.set_ylim(450, 3050)
 
 # fig.savefig('docs/semester-start-v-new-cases.png')
 fig.show()
 
 
-# In[4]:
+# In[5]:
 
 
 fig, ax = plt.subplots(figsize=(10, 4), dpi=300)
