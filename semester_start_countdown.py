@@ -19,6 +19,7 @@
 
 
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
 import numpy as np
 import pandas as pd
 import requests
@@ -60,6 +61,12 @@ def days_until_start(row: pd.Series) -> int:
         return (FALL_2020_START - row[DATE]).days
     elif row[SEMESTER] == SPRING_2021:
         return (SPRING_2021_START - row[DATE]).days
+
+def date_axis_text(x, pos):
+    td = pd.Timedelta(x, 'days')
+    fall_equiv, spring_equiv = [
+        (semester-td).strftime('%b %d') for semester in (FALL_2020_START, SPRING_2021_START)]
+    return ('{}\n{}'.format(fall_equiv, spring_equiv))
 
 
 # In[2]:
@@ -103,17 +110,26 @@ df_la[DAYS_UNTIL_SEMESTER] = df_la.apply(days_until_start, 'columns')
 fig, ax = plt.subplots(figsize=(10, 5), dpi=300)
 
 rate_multiplier = (10_257_557 / 1e5) / 0.722
-substantial_rate = 7 * rate_multiplier
+substantial_rate, moderate_rate = [rate_multiplier * x for x in (7, 4)]
+widespread_color = '#802f67'
 substantial_color = '#c43d53'
-moderate_rate = 4 * rate_multiplier
 moderate_color = '#d97641'
-bottom_margin = 50
-message = 'Lecture capactiy restricted to {}%'
+widespread_message = 'Closed for in-person lectures'
+substantial_message, moderate_message = [
+    'Lecture capacity limited to {}%'.format(x) for x in (25, 50)]
+vertical_pad = 50
+horizontal_pad = 1
 alpha = 0.75
+ax.text(horizontal_pad, substantial_rate+50, widespread_message, ha='right', color=widespread_color, alpha=alpha)
 ax.axhline(substantial_rate, color=substantial_color, linestyle='dashed', alpha=alpha)
-ax.text(45, substantial_rate+bottom_margin, message.format(25), color=substantial_color, alpha=alpha)
+ax.text(horizontal_pad, substantial_rate-vertical_pad, substantial_message,
+        ha='right', va='top', color=substantial_color, alpha=alpha)
 ax.axhline(moderate_rate, color=moderate_color, linestyle='dashed', alpha=alpha)
-ax.text(45, moderate_rate+bottom_margin, message.format(50), color=moderate_color, alpha=alpha)
+ax.text(horizontal_pad, moderate_rate-vertical_pad, moderate_message,
+        ha='right', va='top', color=moderate_color, alpha=alpha)
+
+ax.annotate('4th of July weekend\nreduced testing', xy=(49, 2275), xytext=(55, 1800),
+           arrowprops={'arrowstyle':'->', 'color':'k'})
 
 ax.set_title('Los Angeles County COVID-19 Transmission before TCC Semester')
 ax.plot(DAYS_UNTIL_SEMESTER, NEW_CASES_AVG, color=FALL_2020_COLOR, label='Fall 2020',
@@ -124,10 +140,11 @@ ax.plot(DAYS_UNTIL_SEMESTER, NEW_CASES_AVG, linestyle='dashdot', color=SPRING_20
         data=df_la[(df_la[SEMESTER]==SPRING_2021) & (df_la[DATE]>=reporting_lag_window)])
 
 ax.legend(title='Semester')
-ax.set_xlabel(DAYS_UNTIL_SEMESTER)
+ax.set_xlabel('Date (Fall 2020 timeline, Spring 2021 timeline)')
 ax.set_ylabel(NEW_CASES_AVG)
 ax.set_xlim(120, 0)
-ax.set_ylim(450, 3050)
+ax.xaxis.set_major_formatter(FuncFormatter(date_axis_text))
+ax.set_ylim(moderate_rate-vertical_pad-150, 3050)
 
 # fig.savefig('docs/semester-start-v-new-cases.png')
 fig.show()
