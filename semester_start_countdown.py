@@ -8,7 +8,7 @@
 # * **Spring 2021** - 25 January 2021
 # 
 # ## Last Update
-# Sunday, 1 November 2020
+# Monday, 2 November 2020
 # 
 # ## Data Sources
 # * California Department of Public Health
@@ -50,6 +50,8 @@ SPRING_2021 = 'Spring 2021'
 SPRING_2021_START = pd.Timestamp('2021-01-25')
 SPRING_2021_COLOR = sns.color_palette()[1]
 
+X_AXIS_LABEL = 'Date (Fall 2020 timeline, Spring 2021 timeline)'
+
 def fetch_ca_dataset(url, output_csv):
     r = requests.get(url)
     if r.status_code == HTTP_OK:
@@ -76,13 +78,16 @@ def date_axis_text(x, pos):
 fetch_ca_dataset(CA_HOSPITALIZED_URL, CA_HOSPITALIZED_CSV)
 
 
-# In[3]:
+# In[4]:
 
 
 la_cases = pd.read_csv(LA_CASES_CSV)
 la_cases.rename(columns={'date_use': DATE, 'avg_cases': NEW_CASES_AVG}, inplace=True)
 la_cases[DATE] = pd.to_datetime(la_cases[DATE])
-reporting_lag_window = la_cases[DATE].max() - pd.Timedelta(7, 'days')
+lag_one_week, lag_two_week = [la_cases[DATE].max() - pd.Timedelta(x, 'days') for x in (7, 14)]
+lag_one_y, lag_two_y = [
+    la_cases.loc[la_cases[DATE]==x, NEW_CASES_AVG].iloc[0] for x in (lag_one_week, lag_two_week)]
+lag_one_x, lag_two_x = [(SPRING_2021_START - x).days for x in (lag_one_week, lag_two_week)]
 
 df_hospitalized = pd.read_csv(CA_HOSPITALIZED_CSV)
 df_hospitalized.rename(columns={'todays_date': DATE}, inplace=True)
@@ -104,7 +109,7 @@ df_la[SEMESTER] = df_la[DATE].apply(lambda x: FALL_2020 if x <= FALL_2020_START 
 df_la[DAYS_UNTIL_SEMESTER] = df_la.apply(days_until_start, 'columns')
 
 
-# In[4]:
+# In[5]:
 
 
 fig, ax = plt.subplots(figsize=(10, 5), dpi=300)
@@ -135,13 +140,20 @@ ax.annotate('4th of July weekend\nreduced testing', xy=(49, 2275), xytext=(55, 1
 ax.set_title('Los Angeles County COVID-19 Transmission before TCC Semester')
 ax.plot(DAYS_UNTIL_SEMESTER, NEW_CASES_AVG, color=FALL_2020_COLOR, label='Fall 2020',
         data=df_la[df_la[SEMESTER]==FALL_2020])
+
+lag_tick_height = 30
+ax.plot([lag_two_x]*2, [lag_two_y-lag_tick_height, lag_two_y+lag_tick_height],
+       color=SPRING_2021_COLOR)
+ax.plot([lag_one_x]*2, [lag_one_y-lag_tick_height, lag_one_y+lag_tick_height],
+       color=SPRING_2021_COLOR)
 ax.plot(DAYS_UNTIL_SEMESTER, NEW_CASES_AVG, color=SPRING_2021_COLOR, label='Spring 2021',
-        data=df_la[(df_la[SEMESTER]==SPRING_2021) & (df_la[DATE]<=reporting_lag_window)])
-ax.plot(DAYS_UNTIL_SEMESTER, NEW_CASES_AVG, linestyle='dashdot', color=SPRING_2021_COLOR, label='Spring 2021 (Reporting Lag)',
-        data=df_la[(df_la[SEMESTER]==SPRING_2021) & (df_la[DATE]>=reporting_lag_window)])
+        data=df_la[(df_la[SEMESTER]==SPRING_2021) & (df_la[DATE]<=lag_two_week)])
+ax.plot(DAYS_UNTIL_SEMESTER, NEW_CASES_AVG, linestyle='dashdot', color=SPRING_2021_COLOR,
+        label='Spring 2021 (Reporting Lag)',
+        data=df_la[(df_la[SEMESTER]==SPRING_2021) & (df_la[DATE]>=lag_two_week)])
 
 ax.legend(title='Semester')
-ax.set_xlabel('Date (Fall 2020 timeline, Spring 2021 timeline)')
+ax.set_xlabel(X_AXIS_LABEL)
 ax.set_ylabel(NEW_CASES_AVG)
 ax.set_xlim(120, 0)
 ax.xaxis.set_major_formatter(FuncFormatter(date_axis_text))
@@ -151,7 +163,7 @@ ax.set_ylim(moderate_rate-vertical_pad-150, 3050)
 fig.show()
 
 
-# In[5]:
+# In[6]:
 
 
 fig, ax = plt.subplots(figsize=(10, 4), dpi=300)
@@ -165,7 +177,8 @@ ax.plot(DAYS_UNTIL_SEMESTER, HOSPITALIZED_CONFIRMED_AVG, color=sns.color_palette
         data=df_la[df_la[SEMESTER] == SPRING_2021])
 
 ax.legend(title='Semester, Patient COVID-19 Diagnosis')
-ax.set_xlabel(DAYS_UNTIL_SEMESTER)
+ax.set_xlabel(X_AXIS_LABEL)
+ax.xaxis.set_major_formatter(FuncFormatter(date_axis_text))
 ax.set_ylabel('Hospitalized, 3 day avgerage')
 ax.set_title('Los Angeles County COVID-19 Hospital Patients before TCC Semester')
 ax.set_xlim(120, 0)
