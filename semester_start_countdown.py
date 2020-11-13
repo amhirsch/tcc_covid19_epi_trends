@@ -7,8 +7,8 @@
 # * **Fall 2020** - 24 August 2020
 # * **Spring 2021** - 25 January 2021
 # 
-# ## Last Update
-# Monday, 2 November 2020
+# <!--## Last Update
+# Tuesday, 3 November 2020 -->
 # 
 # ## Data Sources
 # * California Department of Public Health
@@ -25,23 +25,27 @@ import pandas as pd
 import requests
 import seaborn as sns
 
+plt.rcParams.update({'figure.autolayout': True})
 sns.set()
 
-LA_CASES_CSV = 'LA_County_Covid19_cases_deaths_date_table.csv'
+CA_CASES_URL = 'https://data.ca.gov/dataset/590188d5-8545-4c93-a9a0-e230f0db7290/resource/926fd08f-cc91-4828-af38-bd45de97f8c3/download/statewide_cases.csv'
+CA_CASES_CSV = 'ca_cases.csv'
 
 CA_HOSPITALIZED_URL = 'https://data.ca.gov/dataset/529ac907-6ba1-4cb7-9aae-8966fc96aeef/resource/42d33765-20fd-44b8-a978-b083b7542225/download/hospitals_by_county.csv'
 CA_HOSPITALIZED_CSV = 'ca_hospitalized.csv'
 
-HTTP_OK = 200
-
 COUNTY = 'county'
-DATE = 'Date'
+DATE = 'date'
+NEW_CASES = 'newcountconfirmed'
 LOS_ANGELES = 'Los Angeles'
-NEW_CASES_AVG = 'New Cases, 7 day average'
+NEW_CASES_AVG = 'New Cases, 14 day average'
 HOSPITALIZED_CONFIRMED_AVG = 'Hospitalized - Confrimed, 3 day average'
 HOSPITALIZED_ALL_AVG = 'Hospitalized - Confirmed and Suspected, 3 day average'
 SEMESTER = 'Semester'
 DAYS_UNTIL_SEMESTER = 'Days Until Semester Start'
+
+CASE_ROLLING_WINDOW = 14
+NEW_CASES_AVG = 'New Cases, {} day average'.format(CASE_ROLLING_WINDOW)
 
 FALL_2020 = 'Fall 2020'
 FALL_2020_START = pd.Timestamp('2020-08-24')
@@ -54,9 +58,11 @@ X_AXIS_LABEL = 'Date (Fall 2020 timeline, Spring 2021 timeline)'
 
 def fetch_ca_dataset(url, output_csv):
     r = requests.get(url)
-    if r.status_code == HTTP_OK:
+    if r.status_code == 200:
         with open(output_csv, 'w') as f:
             f.write(r.text)
+    else:
+        raise ConnectionError('HTTP code not 200')
 
 def days_until_start(row: pd.Series) -> int:
     if row[SEMESTER] == FALL_2020:
@@ -74,25 +80,46 @@ def date_axis_text(x, pos):
 # In[2]:
 
 
-# Los Angeles County new cases table manually downloaded
+fetch_ca_dataset(CA_CASES_URL, CA_CASES_CSV)
 fetch_ca_dataset(CA_HOSPITALIZED_URL, CA_HOSPITALIZED_CSV)
 
 
-# In[4]:
+# In[3]:
 
 
-la_cases = pd.read_csv(LA_CASES_CSV)
-la_cases.rename(columns={'date_use': DATE, 'avg_cases': NEW_CASES_AVG}, inplace=True)
-la_cases[DATE] = pd.to_datetime(la_cases[DATE])
-lag_one_week, lag_two_week = [la_cases[DATE].max() - pd.Timedelta(x, 'days') for x in (7, 14)]
-lag_one_y, lag_two_y = [
-    la_cases.loc[la_cases[DATE]==x, NEW_CASES_AVG].iloc[0] for x in (lag_one_week, lag_two_week)]
-lag_one_x, lag_two_x = [(SPRING_2021_START - x).days for x in (lag_one_week, lag_two_week)]
+df_cases = pd.read_csv(CA_CASES_CSV)
+la_cases = df_cases.loc[
+    df_cases[COUNTY]==LOS_ANGELES].drop(columns=COUNTY).reset_index(drop=True)
+la_cases.loc[:, DATE] = pd.to_datetime(la_cases.loc[:, DATE])
 
-df_hospitalized = pd.read_csv(CA_HOSPITALIZED_CSV)
-df_hospitalized.rename(columns={'todays_date': DATE}, inplace=True)
-la_hospitalized = pd.DataFrame(df_hospitalized[df_hospitalized[COUNTY] == LOS_ANGELES])
-la_hospitalized[DATE] = pd.to_datetime(la_hospitalized[DATE])
+bad_data_id = 198
+padding = 3
+la_cases.loc[bad_data_id, NEW_CASES] = round(
+    la_cases.loc[bad_data_id-padding:bad_data_id-1, NEW_CASES].append(
+    la_cases.loc[bad_data_id+1:bad_data_id+padding, NEW_CASES]).mean())
+
+la_cases.loc[201, NEW_CASES] = la_cases.loc[201, NEW_CASES] + 500
+la_cases.loc[218, NEW_CASES] = la_cases.loc[218, NEW_CASES] - 500
+
+la_cases.loc[214, NEW_CASES] = la_cases.loc[214, NEW_CASES] + 500
+la_cases.loc[215, NEW_CASES] = la_cases.loc[215, NEW_CASES] + 500
+la_cases.loc[216, NEW_CASES] = la_cases.loc[216, NEW_CASES] + 500
+la_cases.loc[217, NEW_CASES] = la_cases.loc[217, NEW_CASES] + 500
+la_cases.loc[218, NEW_CASES] = la_cases.loc[218, NEW_CASES] - 1000
+la_cases.loc[219, NEW_CASES] = la_cases.loc[219, NEW_CASES] - 1000
+
+la_cases.loc[221, NEW_CASES] = la_cases.loc[221, NEW_CASES] + 600
+la_cases.loc[218, NEW_CASES] = la_cases.loc[218, NEW_CASES] - 600
+
+la_cases.loc[222, NEW_CASES] = la_cases.loc[222, NEW_CASES] + 600
+la_cases.loc[220, NEW_CASES] = la_cases.loc[220, NEW_CASES] - 600
+
+la_cases[NEW_CASES_AVG] = la_cases.loc[:, NEW_CASES].rolling(CASE_ROLLING_WINDOW).mean()
+
+df_hospitalized = pd.read_csv(CA_HOSPITALIZED_CSV).rename(columns={'todays_date': DATE})
+la_hospitalized = df_hospitalized.loc[
+    df_hospitalized[COUNTY]==LOS_ANGELES].drop(columns=COUNTY).reset_index(drop=True)
+la_hospitalized.loc[:, DATE] = pd.to_datetime(la_hospitalized.loc[:, DATE])
 
 daily_average = (
     ('hospitalized_covid_confirmed_patients', HOSPITALIZED_CONFIRMED_AVG),
@@ -101,21 +128,20 @@ daily_average = (
 for col_day, col_avg in daily_average:
     la_hospitalized[col_avg] = la_hospitalized[col_day].rolling(3).mean().round(1)
 
-df_la = pd.merge(la_cases, la_hospitalized, 'outer', DATE, sort=True)
-df_la.reset_index(drop=True, inplace=True)
-df_la = df_la.loc[:, (DATE, NEW_CASES_AVG, HOSPITALIZED_CONFIRMED_AVG, HOSPITALIZED_ALL_AVG)]
-
-df_la[SEMESTER] = df_la[DATE].apply(lambda x: FALL_2020 if x <= FALL_2020_START else SPRING_2021)
+df_la = pd.merge(la_cases, la_hospitalized, on=DATE).reset_index(drop=True)
+df_la[SEMESTER] = df_la.loc[:, DATE].apply(
+    lambda x: FALL_2020 if x <= FALL_2020_START else SPRING_2021)
 df_la[DAYS_UNTIL_SEMESTER] = df_la.apply(days_until_start, 'columns')
+df_la = df_la.loc[:, (DATE, SEMESTER, DAYS_UNTIL_SEMESTER,
+                      NEW_CASES_AVG, HOSPITALIZED_CONFIRMED_AVG, HOSPITALIZED_ALL_AVG)]
 
 
-# In[5]:
+# In[4]:
 
 
-fig, ax = plt.subplots(figsize=(10, 5), dpi=300)
+fig, ax = plt.subplots(figsize=(8, 4), dpi=300)
 
-los_angeles_population = 9_651_332 * (10_257_557 / 10_269_935)
-rate_multiplier = (los_angeles_population / 1e5) / 0.722
+rate_multiplier = (10_257_557 / 1e5) / 0.663
 substantial_rate, moderate_rate = [rate_multiplier * x for x in (7, 4)]
 widespread_color = '#802f67'
 substantial_color = '#c43d53'
@@ -134,39 +160,23 @@ ax.axhline(moderate_rate, color=moderate_color, linestyle='dashed', alpha=alpha)
 ax.text(horizontal_pad, moderate_rate-vertical_pad, moderate_message,
         ha='right', va='top', color=moderate_color, alpha=alpha)
 
-ax.annotate('4th of July weekend\nreduced testing', xy=(49, 2275), xytext=(55, 1800),
-           arrowprops={'arrowstyle':'->', 'color':'k'})
-
 ax.set_title('Los Angeles County COVID-19 Transmission before TCC Semester')
-ax.plot(DAYS_UNTIL_SEMESTER, NEW_CASES_AVG, color=FALL_2020_COLOR, label='Fall 2020',
-        data=df_la[df_la[SEMESTER]==FALL_2020])
+sns.lineplot(DAYS_UNTIL_SEMESTER, NEW_CASES_AVG, hue=SEMESTER, data=df_la, ax=ax)
 
-lag_tick_height = 30
-ax.plot([lag_two_x]*2, [lag_two_y-lag_tick_height, lag_two_y+lag_tick_height],
-       color=SPRING_2021_COLOR)
-ax.plot([lag_one_x]*2, [lag_one_y-lag_tick_height, lag_one_y+lag_tick_height],
-       color=SPRING_2021_COLOR)
-ax.plot(DAYS_UNTIL_SEMESTER, NEW_CASES_AVG, color=SPRING_2021_COLOR, label='Spring 2021',
-        data=df_la[(df_la[SEMESTER]==SPRING_2021) & (df_la[DATE]<=lag_two_week)])
-ax.plot(DAYS_UNTIL_SEMESTER, NEW_CASES_AVG, linestyle='dashdot', color=SPRING_2021_COLOR,
-        label='Spring 2021 (Reporting Lag)',
-        data=df_la[(df_la[SEMESTER]==SPRING_2021) & (df_la[DATE]>=lag_two_week)])
-
-ax.legend(title='Semester')
 ax.set_xlabel(X_AXIS_LABEL)
 ax.set_ylabel(NEW_CASES_AVG)
 ax.set_xlim(120, 0)
 ax.xaxis.set_major_formatter(FuncFormatter(date_axis_text))
-ax.set_ylim(moderate_rate-vertical_pad-150, 3050)
+ax.set_ylim(moderate_rate-vertical_pad-180, 3100)
 
-# fig.savefig('docs/semester-start-v-new-cases.png')
+fig.savefig('docs/semester-start-v-new-cases.png')
 fig.show()
 
 
-# In[6]:
+# In[5]:
 
 
-fig, ax = plt.subplots(figsize=(10, 4), dpi=300)
+fig, ax = plt.subplots(figsize=(8, 4), dpi=300)
 ax.plot(DAYS_UNTIL_SEMESTER, HOSPITALIZED_ALL_AVG, 'b--', label='Fall 2020, Confirmed and Suspected',
         data=df_la[df_la[SEMESTER] == FALL_2020])
 ax.plot(DAYS_UNTIL_SEMESTER, HOSPITALIZED_CONFIRMED_AVG, 'b-', label='Fall 2020, Confirmed',
@@ -183,12 +193,6 @@ ax.set_ylabel('Hospitalized, 3 day avgerage')
 ax.set_title('Los Angeles County COVID-19 Hospital Patients before TCC Semester')
 ax.set_xlim(120, 0)
 ax.set_ylim(0)
-# fig.savefig('docs/semester-start-v-hospitalized.png')
+fig.savefig('docs/semester-start-v-hospitalized.png')
 fig.show()
-
-
-# In[ ]:
-
-
-
 
