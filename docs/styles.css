@@ -1,4 +1,8 @@
+body {
+    max-width: 50em;
+    font-family: sans-serif;
+    margin: 0px auto;
+}
 .graphs {
-    max-width: 80em;
     width: 100%;
 }

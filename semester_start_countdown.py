@@ -84,7 +84,7 @@ fetch_ca_dataset(CA_CASES_URL, CA_CASES_CSV)
 fetch_ca_dataset(CA_HOSPITALIZED_URL, CA_HOSPITALIZED_CSV)
 
 
-# In[3]:
+# In[2]:
 
 
 df_cases = pd.read_csv(CA_CASES_CSV)
@@ -167,13 +167,13 @@ ax.set_xlabel(X_AXIS_LABEL)
 ax.set_ylabel(NEW_CASES_AVG)
 ax.set_xlim(120, 0)
 ax.xaxis.set_major_formatter(FuncFormatter(date_axis_text))
-ax.set_ylim(moderate_rate-vertical_pad-180, 3100)
+ax.set_ylim(moderate_rate-vertical_pad-180, df_la[NEW_CASES_AVG].max()+100)
 
 fig.savefig('docs/semester-start-v-new-cases.png')
 fig.show()
 
 
-# In[5]:
+# In[6]:
 
 
 fig, ax = plt.subplots(figsize=(8, 4), dpi=300)
@@ -192,7 +192,13 @@ ax.xaxis.set_major_formatter(FuncFormatter(date_axis_text))
 ax.set_ylabel('Hospitalized, 3 day avgerage')
 ax.set_title('Los Angeles County COVID-19 Hospital Patients before TCC Semester')
 ax.set_xlim(120, 0)
-ax.set_ylim(0)
+ax.set_ylim(0, df_la[HOSPITALIZED_ALL_AVG].max()+100)
 fig.savefig('docs/semester-start-v-hospitalized.png')
 fig.show()
+
+
+# In[ ]:
+
+
+
 
