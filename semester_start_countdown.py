@@ -12,8 +12,8 @@
 # 
 # ## Data Sources
 # * California Department of Public Health
-#   * [COVID-19 Cases](https://data.ca.gov/dataset/covid-19-cases)
-#   * [COVID-19 Hospital Data](https://data.ca.gov/dataset/covid-19-hospital-data)
+#   * [COVID-19 Cases](https://data.ca.gov/dataset/covid-19-cases/resource/926fd08f-cc91-4828-af38-bd45de97f8c3?filters=county%3ALos+Angeles)
+#   * [COVID-19 Hospital Data](https://data.ca.gov/dataset/covid-19-hospital-data/resource/42d33765-20fd-44b8-a978-b083b7542225?filters=county%3ALos+Angeles)
 
 # In[1]:
 
@@ -84,7 +84,7 @@ fetch_ca_dataset(CA_CASES_URL, CA_CASES_CSV)
 fetch_ca_dataset(CA_HOSPITALIZED_URL, CA_HOSPITALIZED_CSV)
 
 
-# In[2]:
+# In[3]:
 
 
 df_cases = pd.read_csv(CA_CASES_CSV)
@@ -114,6 +114,10 @@ la_cases.loc[218, NEW_CASES] = la_cases.loc[218, NEW_CASES] - 600
 la_cases.loc[222, NEW_CASES] = la_cases.loc[222, NEW_CASES] + 600
 la_cases.loc[220, NEW_CASES] = la_cases.loc[220, NEW_CASES] - 600
 
+# 1,500 new cases backlog reported on November 23
+la_cases.loc[249, NEW_CASES] = la_cases.loc[249, NEW_CASES] + 1500
+la_cases.loc[250, NEW_CASES] = la_cases.loc[250, NEW_CASES] - 1500
+
 la_cases[NEW_CASES_AVG] = la_cases.loc[:, NEW_CASES].rolling(CASE_ROLLING_WINDOW).mean()
 
 df_hospitalized = pd.read_csv(CA_HOSPITALIZED_CSV).rename(columns={'todays_date': DATE})
@@ -141,7 +145,7 @@ df_la = df_la.loc[:, (DATE, SEMESTER, DAYS_UNTIL_SEMESTER,
 
 fig, ax = plt.subplots(figsize=(8, 4), dpi=300)
 
-rate_multiplier = (10_257_557 / 1e5) / 0.663
+rate_multiplier = (10_257_557 / 1e5) / 0.500
 substantial_rate, moderate_rate = [rate_multiplier * x for x in (7, 4)]
 widespread_color = '#802f67'
 substantial_color = '#c43d53'
@@ -173,7 +177,7 @@ fig.savefig('docs/semester-start-v-new-cases.png')
 fig.show()
 
 
-# In[6]:
+# In[5]:
 
 
 fig, ax = plt.subplots(figsize=(8, 4), dpi=300)
