@@ -15,7 +15,7 @@
 #   * [COVID-19 Cases](https://data.ca.gov/dataset/covid-19-cases/resource/926fd08f-cc91-4828-af38-bd45de97f8c3?filters=county%3ALos+Angeles)
 #   * [COVID-19 Hospital Data](https://data.ca.gov/dataset/covid-19-hospital-data/resource/42d33765-20fd-44b8-a978-b083b7542225?filters=county%3ALos+Angeles)
 
-# In[1]:
+# In[ ]:
 
 
 import matplotlib.pyplot as plt
@@ -77,14 +77,14 @@ def date_axis_text(x, pos):
     return ('{}\n{}'.format(fall_equiv, spring_equiv))
 
 
-# In[2]:
+# In[ ]:
 
 
 fetch_ca_dataset(CA_CASES_URL, CA_CASES_CSV)
 fetch_ca_dataset(CA_HOSPITALIZED_URL, CA_HOSPITALIZED_CSV)
 
 
-# In[3]:
+# In[ ]:
 
 
 df_cases = pd.read_csv(CA_CASES_CSV)
@@ -140,7 +140,7 @@ df_la = df_la.loc[:, (DATE, SEMESTER, DAYS_UNTIL_SEMESTER,
                       NEW_CASES_AVG, HOSPITALIZED_CONFIRMED_AVG, HOSPITALIZED_ALL_AVG)]
 
 
-# In[4]:
+# In[ ]:
 
 
 fig, ax = plt.subplots(figsize=(8, 4), dpi=300)
@@ -165,7 +165,7 @@ ax.text(horizontal_pad, moderate_rate-vertical_pad, moderate_message,
         ha='right', va='top', color=moderate_color, alpha=alpha)
 
 ax.set_title('Los Angeles County COVID-19 Transmission before TCC Semester')
-sns.lineplot(DAYS_UNTIL_SEMESTER, NEW_CASES_AVG, hue=SEMESTER, data=df_la, ax=ax)
+sns.lineplot(x=DAYS_UNTIL_SEMESTER, y=NEW_CASES_AVG, hue=SEMESTER, data=df_la, ax=ax)
 
 ax.set_xlabel(X_AXIS_LABEL)
 ax.set_ylabel(NEW_CASES_AVG)
@@ -177,7 +177,7 @@ fig.savefig('docs/semester-start-v-new-cases.png')
 fig.show()
 
 
-# In[5]:
+# In[ ]:
 
 
 fig, ax = plt.subplots(figsize=(8, 4), dpi=300)
