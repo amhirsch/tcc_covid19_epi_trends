@@ -154,7 +154,7 @@ widespread_message = 'Closed for in-person lectures'
 substantial_message, moderate_message = [
     'Lecture capacity limited to {}%'.format(x) for x in (25, 50)]
 vertical_pad = 50
-horizontal_pad = 1
+horizontal_pad = 1.5
 alpha = 0.75
 ax.text(horizontal_pad, substantial_rate+50, widespread_message, ha='right', color=widespread_color, alpha=alpha)
 ax.axhline(substantial_rate, color=substantial_color, linestyle='dashed', alpha=alpha)
@@ -171,7 +171,8 @@ ax.set_xlabel(X_AXIS_LABEL)
 ax.set_ylabel(NEW_CASES_AVG)
 ax.set_xlim(120, 0)
 ax.xaxis.set_major_formatter(FuncFormatter(date_axis_text))
-ax.set_ylim(moderate_rate-vertical_pad-180, df_la[NEW_CASES_AVG].max()+100)
+ax.set_ylim(moderate_rate-vertical_pad-250, df_la[NEW_CASES_AVG].max()+100)
+ax.legend(loc='upper left', title=SEMESTER)
 
 fig.savefig('docs/semester-start-v-new-cases.png')
 fig.show()
@@ -181,12 +182,12 @@ fig.show()
 
 
 fig, ax = plt.subplots(figsize=(8, 4), dpi=300)
-ax.plot(DAYS_UNTIL_SEMESTER, HOSPITALIZED_ALL_AVG, 'b--', label='Fall 2020, Confirmed and Suspected',
+ax.plot(DAYS_UNTIL_SEMESTER, HOSPITALIZED_ALL_AVG, 'b--', label='Fall 2020, Confirmed & Suspected',
         data=df_la[df_la[SEMESTER] == FALL_2020])
 ax.plot(DAYS_UNTIL_SEMESTER, HOSPITALIZED_CONFIRMED_AVG, 'b-', label='Fall 2020, Confirmed',
         data=df_la[df_la[SEMESTER] == FALL_2020])
 ax.plot(DAYS_UNTIL_SEMESTER, HOSPITALIZED_ALL_AVG, '--', color=sns.color_palette()[1],
-        label='Spring 2021, Confirmed and Suspected', data=df_la[df_la[SEMESTER] == SPRING_2021])
+        label='Spring 2021, Confirmed & Suspected', data=df_la[df_la[SEMESTER] == SPRING_2021])
 ax.plot(DAYS_UNTIL_SEMESTER, HOSPITALIZED_CONFIRMED_AVG, color=sns.color_palette()[1], label='Spring 2021, Confirmed',
         data=df_la[df_la[SEMESTER] == SPRING_2021])
 
@@ -196,7 +197,7 @@ ax.xaxis.set_major_formatter(FuncFormatter(date_axis_text))
 ax.set_ylabel('Hospitalized, 3 day avgerage')
 ax.set_title('Los Angeles County COVID-19 Hospital Patients before TCC Semester')
 ax.set_xlim(120, 0)
-ax.set_ylim(0, df_la[HOSPITALIZED_ALL_AVG].max()+100)
+ax.set_ylim(-300, df_la[HOSPITALIZED_ALL_AVG].max()+100)
 fig.savefig('docs/semester-start-v-hospitalized.png')
 fig.show()
 
