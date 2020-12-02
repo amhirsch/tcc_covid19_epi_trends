@@ -18,12 +18,15 @@
 # In[ ]:
 
 
+import locale
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 import numpy as np
 import pandas as pd
 import requests
 import seaborn as sns
+
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 plt.rcParams.update({'figure.autolayout': True})
 sns.set()
@@ -160,18 +163,22 @@ ax.text(horizontal_pad, substantial_rate+50, widespread_message, ha='right', col
 ax.axhline(substantial_rate, color=substantial_color, linestyle='dashed', alpha=alpha)
 ax.text(horizontal_pad, substantial_rate-vertical_pad, substantial_message,
         ha='right', va='top', color=substantial_color, alpha=alpha)
-ax.axhline(moderate_rate, color=moderate_color, linestyle='dashed', alpha=alpha)
-ax.text(horizontal_pad, moderate_rate-vertical_pad, moderate_message,
-        ha='right', va='top', color=moderate_color, alpha=alpha)
+# ax.axhline(moderate_rate, color=moderate_color, linestyle='dashed', alpha=alpha)
+# ax.text(horizontal_pad, moderate_rate-vertical_pad, moderate_message,
+#         ha='right', va='top', color=moderate_color, alpha=alpha)
 
 ax.set_title('Los Angeles County COVID-19 Transmission before TCC Semester')
 sns.lineplot(x=DAYS_UNTIL_SEMESTER, y=NEW_CASES_AVG, hue=SEMESTER, data=df_la, ax=ax)
+
+ax.set_yticks(list(range(0, int(df_la[NEW_CASES_AVG].max())+500, 500)))
+ax.set_yticklabels([f'{int(x):n}' if x%1000==0 else '' for x in ax.get_yticks()])
 
 ax.set_xlabel(X_AXIS_LABEL)
 ax.set_ylabel(NEW_CASES_AVG)
 ax.set_xlim(120, 0)
 ax.xaxis.set_major_formatter(FuncFormatter(date_axis_text))
-ax.set_ylim(moderate_rate-vertical_pad-250, df_la[NEW_CASES_AVG].max()+100)
+# ax.set_ylim(moderate_rate-vertical_pad-250, df_la[NEW_CASES_AVG].max()+100)
+ax.set_ylim(650, df_la[NEW_CASES_AVG].max()+100)
 ax.legend(loc='upper left', title=SEMESTER)
 
 fig.savefig('docs/semester-start-v-new-cases.png')
@@ -191,13 +198,19 @@ ax.plot(DAYS_UNTIL_SEMESTER, HOSPITALIZED_ALL_AVG, '--', color=sns.color_palette
 ax.plot(DAYS_UNTIL_SEMESTER, HOSPITALIZED_CONFIRMED_AVG, color=sns.color_palette()[1], label='Spring 2021, Confirmed',
         data=df_la[df_la[SEMESTER] == SPRING_2021])
 
-ax.legend(title='Semester, Patient COVID-19 Diagnosis')
+ax.set_yticks(list(range(0, int(df_la[HOSPITALIZED_ALL_AVG].max()+500), 500)))
+ax.set_yticklabels([f'{int(x):n}' for x in ax.get_yticks()])
+
 ax.set_xlabel(X_AXIS_LABEL)
 ax.xaxis.set_major_formatter(FuncFormatter(date_axis_text))
 ax.set_ylabel('Hospitalized, 3 day avgerage')
 ax.set_title('Los Angeles County COVID-19 Hospital Patients before TCC Semester')
 ax.set_xlim(120, 0)
-ax.set_ylim(-300, df_la[HOSPITALIZED_ALL_AVG].max()+100)
+ax.set_ylim(-350, df_la[HOSPITALIZED_ALL_AVG].max()+100)
+
+ax.legend(title='Semester, Patient COVID-19 Diagnosis', loc='lower right',
+          ncol=2, fontsize='small', title_fontsize='small')
+
 fig.savefig('docs/semester-start-v-hospitalized.png')
 fig.show()
 
