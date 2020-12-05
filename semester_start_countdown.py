@@ -146,7 +146,7 @@ df_la = df_la.loc[:, (DATE, SEMESTER, DAYS_UNTIL_SEMESTER,
 # In[ ]:
 
 
-fig, ax = plt.subplots(figsize=(8, 4), dpi=300)
+fig, ax = plt.subplots(figsize=(8, 5), dpi=300)
 
 rate_multiplier = (10_257_557 / 1e5) / 0.500
 substantial_rate, moderate_rate = [rate_multiplier * x for x in (7, 4)]
@@ -178,7 +178,7 @@ ax.set_ylabel(NEW_CASES_AVG)
 ax.set_xlim(120, 0)
 ax.xaxis.set_major_formatter(FuncFormatter(date_axis_text))
 # ax.set_ylim(moderate_rate-vertical_pad-250, df_la[NEW_CASES_AVG].max()+100)
-ax.set_ylim(650, df_la[NEW_CASES_AVG].max()+100)
+ax.set_ylim(600, df_la[NEW_CASES_AVG].max()+100)
 ax.legend(loc='upper left', title=SEMESTER)
 
 fig.savefig('docs/semester-start-v-new-cases.png')
@@ -188,7 +188,7 @@ fig.show()
 # In[ ]:
 
 
-fig, ax = plt.subplots(figsize=(8, 4), dpi=300)
+fig, ax = plt.subplots(figsize=(8, 5), dpi=300)
 ax.plot(DAYS_UNTIL_SEMESTER, HOSPITALIZED_ALL_AVG, 'b--', label='Fall 2020, Confirmed & Suspected',
         data=df_la[df_la[SEMESTER] == FALL_2020])
 ax.plot(DAYS_UNTIL_SEMESTER, HOSPITALIZED_CONFIRMED_AVG, 'b-', label='Fall 2020, Confirmed',
@@ -206,7 +206,7 @@ ax.xaxis.set_major_formatter(FuncFormatter(date_axis_text))
 ax.set_ylabel('Hospitalized, 3 day avgerage')
 ax.set_title('Los Angeles County COVID-19 Hospital Patients before TCC Semester')
 ax.set_xlim(120, 0)
-ax.set_ylim(-350, df_la[HOSPITALIZED_ALL_AVG].max()+100)
+ax.set_ylim(-100, df_la[HOSPITALIZED_ALL_AVG].max()+100)
 
 ax.legend(title='Semester, Patient COVID-19 Diagnosis', loc='lower right',
           ncol=2, fontsize='small', title_fontsize='small')
