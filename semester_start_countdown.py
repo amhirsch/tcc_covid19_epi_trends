@@ -148,7 +148,7 @@ df_la = df_la.loc[:, (DATE, SEMESTER, DAYS_UNTIL_SEMESTER,
 
 fig, ax = plt.subplots(figsize=(8, 5), dpi=300)
 
-rate_multiplier = (10_257_557 / 1e5) / 0.500
+rate_multiplier = (10_257_557 / 1e5) / 0.642
 substantial_rate, moderate_rate = [rate_multiplier * x for x in (7, 4)]
 widespread_color = '#802f67'
 substantial_color = '#c43d53'
@@ -171,7 +171,7 @@ ax.set_title('Los Angeles County COVID-19 Transmission before TCC Semester')
 sns.lineplot(x=DAYS_UNTIL_SEMESTER, y=NEW_CASES_AVG, hue=SEMESTER, data=df_la, ax=ax)
 
 ax.set_yticks(list(range(0, int(df_la[NEW_CASES_AVG].max())+500, 500)))
-ax.set_yticklabels([f'{int(x):n}' if x%1000==0 else '' for x in ax.get_yticks()])
+ax.set_yticklabels([f'{int(x):n}' if x%1e3==0 else '' for x in ax.get_yticks()])
 
 ax.set_xlabel(X_AXIS_LABEL)
 ax.set_ylabel(NEW_CASES_AVG)
@@ -199,7 +199,7 @@ ax.plot(DAYS_UNTIL_SEMESTER, HOSPITALIZED_CONFIRMED_AVG, color=sns.color_palette
         data=df_la[df_la[SEMESTER] == SPRING_2021])
 
 ax.set_yticks(list(range(0, int(df_la[HOSPITALIZED_ALL_AVG].max()+500), 500)))
-ax.set_yticklabels([f'{int(x):n}' for x in ax.get_yticks()])
+ax.set_yticklabels([f'{int(x):n}' if x%1e3==0 else '' for x in ax.get_yticks()])
 
 ax.set_xlabel(X_AXIS_LABEL)
 ax.xaxis.set_major_formatter(FuncFormatter(date_axis_text))
