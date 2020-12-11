@@ -79,6 +79,13 @@ def date_axis_text(x, pos):
         (semester-td).strftime('%b %d') for semester in (FALL_2020_START, SPRING_2021_START)]
     return ('{}\n{}'.format(fall_equiv, spring_equiv))
 
+def chart_upper_bound(dep_var_series, tick_step, buffer):
+    ticks_needed = (dep_var_series.max() + tick_step) // tick_step
+    return int(tick_step * ticks_needed + buffer)
+
+def chart_lower_bound(upper_bound, ratio, top_value):
+    return (ratio * upper_bound - top_value) / (ratio - 1)
+
 
 # In[ ]:
 
@@ -146,7 +153,7 @@ df_la = df_la.loc[:, (DATE, SEMESTER, DAYS_UNTIL_SEMESTER,
 # In[ ]:
 
 
-fig, ax = plt.subplots(figsize=(8, 5), dpi=300)
+fig, ax = plt.subplots(figsize=(8, 5.5), dpi=300)
 
 rate_multiplier = (10_257_557 / 1e5) / 0.642
 substantial_rate, moderate_rate = [rate_multiplier * x for x in (7, 4)]
@@ -156,10 +163,11 @@ moderate_color = '#d97641'
 widespread_message = 'Closed for in-person lectures'
 substantial_message, moderate_message = [
     'Lecture capacity limited to {}%'.format(x) for x in (25, 50)]
-vertical_pad = 50
+vertical_pad = 100
 horizontal_pad = 1.5
 alpha = 0.75
-ax.text(horizontal_pad, substantial_rate+50, widespread_message, ha='right', color=widespread_color, alpha=alpha)
+ax.text(horizontal_pad, substantial_rate+vertical_pad, widespread_message,
+        ha='right', color=widespread_color, alpha=alpha)
 ax.axhline(substantial_rate, color=substantial_color, linestyle='dashed', alpha=alpha)
 ax.text(horizontal_pad, substantial_rate-vertical_pad, substantial_message,
         ha='right', va='top', color=substantial_color, alpha=alpha)
@@ -170,15 +178,17 @@ ax.text(horizontal_pad, substantial_rate-vertical_pad, substantial_message,
 ax.set_title('Los Angeles County COVID-19 Transmission before TCC Semester')
 sns.lineplot(x=DAYS_UNTIL_SEMESTER, y=NEW_CASES_AVG, hue=SEMESTER, data=df_la, ax=ax)
 
-ax.set_yticks(list(range(0, int(df_la[NEW_CASES_AVG].max())+500, 500)))
-ax.set_yticklabels([f'{int(x):n}' if x%1e3==0 else '' for x in ax.get_yticks()])
+tick_step = 1000
+y_max = chart_upper_bound(df_la[NEW_CASES_AVG], tick_step, 200)
+ax.set_yticks(list(range(0, y_max, tick_step)))
+ax.set_yticklabels([f'{int(x):n}' if x%2e3==0 else '' for x in ax.get_yticks()])
 
 ax.set_xlabel(X_AXIS_LABEL)
 ax.set_ylabel(NEW_CASES_AVG)
 ax.set_xlim(120, 0)
 ax.xaxis.set_major_formatter(FuncFormatter(date_axis_text))
 # ax.set_ylim(moderate_rate-vertical_pad-250, df_la[NEW_CASES_AVG].max()+100)
-ax.set_ylim(600, df_la[NEW_CASES_AVG].max()+100)
+ax.set_ylim(600, y_max)
 ax.legend(loc='upper left', title=SEMESTER)
 
 fig.savefig('docs/semester-start-v-new-cases.png')
@@ -198,7 +208,9 @@ ax.plot(DAYS_UNTIL_SEMESTER, HOSPITALIZED_ALL_AVG, '--', color=sns.color_palette
 ax.plot(DAYS_UNTIL_SEMESTER, HOSPITALIZED_CONFIRMED_AVG, color=sns.color_palette()[1], label='Spring 2021, Confirmed',
         data=df_la[df_la[SEMESTER] == SPRING_2021])
 
-ax.set_yticks(list(range(0, int(df_la[HOSPITALIZED_ALL_AVG].max()+500), 500)))
+tick_step = 1000
+y_max = chart_upper_bound(df_la[HOSPITALIZED_ALL_AVG], tick_step, 200)
+ax.set_yticks(list(range(0, y_max, tick_step)))
 ax.set_yticklabels([f'{int(x):n}' if x%1e3==0 else '' for x in ax.get_yticks()])
 
 ax.set_xlabel(X_AXIS_LABEL)
@@ -206,7 +218,10 @@ ax.xaxis.set_major_formatter(FuncFormatter(date_axis_text))
 ax.set_ylabel('Hospitalized, 3 day avgerage')
 ax.set_title('Los Angeles County COVID-19 Hospital Patients before TCC Semester')
 ax.set_xlim(120, 0)
-ax.set_ylim(-100, df_la[HOSPITALIZED_ALL_AVG].max()+100)
+
+legend_top = 600
+# ax.axhline(legend_top, color='k')
+ax.set_ylim(chart_lower_bound(y_max, .2, legend_top), y_max)
 
 ax.legend(title='Semester, Patient COVID-19 Diagnosis', loc='lower right',
           ncol=2, fontsize='small', title_fontsize='small')
