@@ -155,7 +155,7 @@ df_la = df_la.loc[:, (DATE, SEMESTER, DAYS_UNTIL_SEMESTER,
 
 fig, ax = plt.subplots(figsize=(8, 5.5), dpi=300)
 
-rate_multiplier = (10_257_557 / 1e5) / 0.642
+rate_multiplier = (10_257_557 / 1e5) / 0.500
 substantial_rate, moderate_rate = [rate_multiplier * x for x in (7, 4)]
 widespread_color = '#802f67'
 substantial_color = '#c43d53'
@@ -164,7 +164,7 @@ widespread_message = 'Closed for in-person lectures'
 substantial_message, moderate_message = [
     'Lecture capacity limited to {}%'.format(x) for x in (25, 50)]
 vertical_pad = 100
-horizontal_pad = 1.5
+horizontal_pad = 5
 alpha = 0.75
 ax.text(horizontal_pad, substantial_rate+vertical_pad, widespread_message,
         ha='right', color=widespread_color, alpha=alpha)
