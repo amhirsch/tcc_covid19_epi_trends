@@ -128,6 +128,10 @@ la_cases.loc[220, NEW_CASES] = la_cases.loc[220, NEW_CASES] - 600
 la_cases.loc[249, NEW_CASES] = la_cases.loc[249, NEW_CASES] + 1500
 la_cases.loc[250, NEW_CASES] = la_cases.loc[250, NEW_CASES] - 1500
 
+# 7,000 backlog reported on December 16
+la_cases.loc[271, NEW_CASES] = la_cases.loc[271, NEW_CASES] + 7000
+la_cases.loc[273, NEW_CASES] = la_cases.loc[273, NEW_CASES] - 7000
+
 la_cases[NEW_CASES_AVG] = la_cases.loc[:, NEW_CASES].rolling(CASE_ROLLING_WINDOW).mean()
 
 df_hospitalized = pd.read_csv(CA_HOSPITALIZED_CSV).rename(columns={'todays_date': DATE})
