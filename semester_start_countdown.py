@@ -185,7 +185,7 @@ sns.lineplot(x=DAYS_UNTIL_SEMESTER, y=NEW_CASES_AVG, hue=SEMESTER, data=df_la, a
 tick_step = 1000
 y_max = chart_upper_bound(df_la[NEW_CASES_AVG], tick_step, 200)
 ax.set_yticks(list(range(0, y_max, tick_step)))
-ax.set_yticklabels([f'{int(x):n}' if x%2e3==0 else '' for x in ax.get_yticks()])
+ax.set_yticklabels([f'{int(x):n}' if x%1_500==0 else '' for x in ax.get_yticks()])
 
 ax.set_xlabel(X_AXIS_LABEL)
 ax.set_ylabel(NEW_CASES_AVG)
