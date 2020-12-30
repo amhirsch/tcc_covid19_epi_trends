@@ -99,38 +99,13 @@ fetch_ca_dataset(CA_HOSPITALIZED_URL, CA_HOSPITALIZED_CSV)
 
 df_cases = pd.read_csv(CA_CASES_CSV)
 la_cases = df_cases.loc[
-    df_cases[COUNTY]==LOS_ANGELES].drop(columns=COUNTY).reset_index(drop=True)
-la_cases.loc[:, DATE] = pd.to_datetime(la_cases.loc[:, DATE])
+    df_cases[COUNTY]==LOS_ANGELES
+].drop(columns=COUNTY).reset_index(drop=True).copy()
+la_cases[DATE] = pd.to_datetime(la_cases[DATE])
 
-bad_data_id = 198
-padding = 3
-la_cases.loc[bad_data_id, NEW_CASES] = round(
-    la_cases.loc[bad_data_id-padding:bad_data_id-1, NEW_CASES].append(
-    la_cases.loc[bad_data_id+1:bad_data_id+padding, NEW_CASES]).mean())
-
-la_cases.loc[201, NEW_CASES] = la_cases.loc[201, NEW_CASES] + 500
-la_cases.loc[218, NEW_CASES] = la_cases.loc[218, NEW_CASES] - 500
-
-la_cases.loc[214, NEW_CASES] = la_cases.loc[214, NEW_CASES] + 500
-la_cases.loc[215, NEW_CASES] = la_cases.loc[215, NEW_CASES] + 500
-la_cases.loc[216, NEW_CASES] = la_cases.loc[216, NEW_CASES] + 500
-la_cases.loc[217, NEW_CASES] = la_cases.loc[217, NEW_CASES] + 500
-la_cases.loc[218, NEW_CASES] = la_cases.loc[218, NEW_CASES] - 1000
-la_cases.loc[219, NEW_CASES] = la_cases.loc[219, NEW_CASES] - 1000
-
-la_cases.loc[221, NEW_CASES] = la_cases.loc[221, NEW_CASES] + 600
-la_cases.loc[218, NEW_CASES] = la_cases.loc[218, NEW_CASES] - 600
-
-la_cases.loc[222, NEW_CASES] = la_cases.loc[222, NEW_CASES] + 600
-la_cases.loc[220, NEW_CASES] = la_cases.loc[220, NEW_CASES] - 600
-
-# 1,500 new cases backlog reported on November 23
-la_cases.loc[249, NEW_CASES] = la_cases.loc[249, NEW_CASES] + 1500
-la_cases.loc[250, NEW_CASES] = la_cases.loc[250, NEW_CASES] - 1500
-
-# 7,000 backlog reported on December 16
-la_cases.loc[271, NEW_CASES] = la_cases.loc[271, NEW_CASES] + 7000
-la_cases.loc[273, NEW_CASES] = la_cases.loc[273, NEW_CASES] - 7000
+# Forward fill new cases for negative new cases day.
+la_cases.loc[198, NEW_CASES] = pd.NA
+la_cases[NEW_CASES].ffill(inplace=True)
 
 la_cases[NEW_CASES_AVG] = la_cases.loc[:, NEW_CASES].rolling(CASE_ROLLING_WINDOW).mean()
 
@@ -182,17 +157,17 @@ ax.text(horizontal_pad, substantial_rate-vertical_pad, substantial_message,
 ax.set_title('Los Angeles County COVID-19 Transmission before TCC Semester')
 sns.lineplot(x=DAYS_UNTIL_SEMESTER, y=NEW_CASES_AVG, hue=SEMESTER, data=df_la, ax=ax)
 
-tick_step = 1000
+tick_step = 1500
 y_max = chart_upper_bound(df_la[NEW_CASES_AVG], tick_step, 200)
 ax.set_yticks(list(range(0, y_max, tick_step)))
-ax.set_yticklabels([f'{int(x):n}' if x%1_500==0 else '' for x in ax.get_yticks()])
+ax.set_yticklabels([f'{int(x):n}' if x%3_000==0 else '' for x in ax.get_yticks()])
 
 ax.set_xlabel(X_AXIS_LABEL)
 ax.set_ylabel(NEW_CASES_AVG)
 ax.set_xlim(120, 0)
 ax.xaxis.set_major_formatter(FuncFormatter(date_axis_text))
 # ax.set_ylim(moderate_rate-vertical_pad-250, df_la[NEW_CASES_AVG].max()+100)
-ax.set_ylim(600, y_max)
+ax.set_ylim(0, y_max)
 ax.legend(loc='upper left', title=SEMESTER)
 
 fig.savefig('docs/semester-start-v-new-cases.png')
@@ -215,7 +190,7 @@ ax.plot(DAYS_UNTIL_SEMESTER, HOSPITALIZED_CONFIRMED_AVG, color=sns.color_palette
 tick_step = 1000
 y_max = chart_upper_bound(df_la[HOSPITALIZED_ALL_AVG], tick_step, 200)
 ax.set_yticks(list(range(0, y_max, tick_step)))
-ax.set_yticklabels([f'{int(x):n}' if x%1e3==0 else '' for x in ax.get_yticks()])
+ax.set_yticklabels([f'{int(x):n}' if x%2_000==0 else '' for x in ax.get_yticks()])
 
 ax.set_xlabel(X_AXIS_LABEL)
 ax.xaxis.set_major_formatter(FuncFormatter(date_axis_text))
