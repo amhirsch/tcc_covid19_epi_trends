@@ -134,7 +134,7 @@ df_la = df_la.loc[:, (DATE, SEMESTER, DAYS_UNTIL_SEMESTER,
 
 fig, ax = plt.subplots(figsize=(8, 5.5), dpi=300)
 
-rate_multiplier = (10_257_557 / 1e5) / 0.609
+rate_multiplier = (10_257_557 / 1e5) / 0.605
 substantial_rate, moderate_rate = [rate_multiplier * x for x in (7, 4)]
 widespread_color = '#802f67'
 substantial_color = '#c43d53'
