@@ -134,7 +134,7 @@ df_la = df_la.loc[:, (DATE, SEMESTER, DAYS_UNTIL_SEMESTER,
 
 fig, ax = plt.subplots(figsize=(8, 5.5), dpi=300)
 
-rate_multiplier = (10_257_557 / 1e5) / 0.605
+rate_multiplier = (10_257_557 / 1e5) / 0.500
 substantial_rate, moderate_rate = [rate_multiplier * x for x in (7, 4)]
 widespread_color = '#802f67'
 substantial_color = '#c43d53'
@@ -206,6 +206,44 @@ ax.legend(title='Semester, Patient COVID-19 Diagnosis', loc='lower right',
           ncol=2, fontsize='small', title_fontsize='small')
 
 fig.savefig('docs/semester-start-v-hospitalized.png')
+fig.show()
+
+
+# In[ ]:
+
+
+LACDPH_CSV = 'lacdph.csv'
+r = requests.get('https://github.com/amhirsch/lac_covid19/raw/master/docs/time-series/aggregate-ts.csv')
+if r.status_code == 200:
+    with open(LACDPH_CSV, 'w') as f:
+        f.write(r.text)
+else:
+    raise ConnectionError('LACDPH Time Series Unavailable')
+
+
+# In[ ]:
+
+
+df_lacdph = pd.read_csv(LACDPH_CSV)
+df_lacdph[DATE] = pd.to_datetime(df_lacdph['Date'])
+df_lacdph = df_lacdph.loc[df_lacdph[DATE]>=pd.to_datetime('2020-12-01'),
+                          [DATE, 'New cases']].copy().reset_index(drop=True)
+df_lacdph[NEW_CASES_AVG] = df_lacdph['New cases'].rolling(14).mean()
+
+
+# In[ ]:
+
+
+reopening_threshold = 10 / 100_000 * 10_260_237
+fig, ax = plt.subplots(figsize=(8, 5), dpi=300)
+sns.lineplot(x=DATE, y=NEW_CASES_AVG, data=df_lacdph, ax=ax)
+ax.axhline(reopening_threshold, linestyle='dashed', color='k')
+ax.text(pd.to_datetime('2021-01-02'), reopening_threshold+300, 'LACDPH Reopening Waivers')
+
+ax.set_xlim(pd.to_datetime('2021-01-01'), pd.to_datetime('2021-03-12'))
+ax.set_ylim(0)
+ax.tick_params('x', labelrotation=90)
+
 fig.show()
 
 
